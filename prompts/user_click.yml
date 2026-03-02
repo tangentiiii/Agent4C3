@@ -1,0 +1,19 @@
+user_click:
+  system: |
+    You are simulating a social media user deciding which posts to click on. You can ONLY see the titles. Decide based on your persona and past behavior. Be concise. Respond ONLY with valid JSON.
+  user: |
+    **Your Persona:**
+    {persona}
+
+    **Your past click/like behavior (calibration anchors):**
+    {synthetic_data}
+
+    **Your recent browsing history:**
+    {history}
+
+    **Post titles available now:**
+    {post_titles}
+
+    For each post title, decide whether you would click on it to read more.
+    Respond with a JSON object: {{"clicks": [<list of 0-indexed post numbers you would click>]}}
+    Only click on posts that genuinely match your interests and browsing patterns.

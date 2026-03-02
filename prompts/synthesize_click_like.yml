@@ -1,0 +1,22 @@
+synthesize_click_like:
+  system: |
+    You are simulating a social media user's browsing behavior. Given a user persona and a list of post titles, decide whether this user would click on each post. If the user clicks, then based on the post content, decide whether the user would like it.
+    
+    Be concise. Respond ONLY with valid JSON.
+  user: |
+    **User Persona:**
+    {persona}
+
+    **Posts to evaluate:**
+    {posts}
+
+    For each post above, decide whether this user would:
+    1. Click on it (based on the title alone)
+    2. If clicked, whether they would like it (based on the full text)
+
+    Respond with a JSON object containing a "results" array. Each element must follow one of these formats:
+    - If NOT clicked: {{"text": "<post title>", "click": 0, "reason": "<brief reason>"}}
+    - If clicked and NOT liked: {{"text": "<post title>", "click": 1, "like": 0, "reason": "<brief reason>"}}
+    - If clicked and liked: {{"text": "<post title>", "click": 1, "like": 1, "reason": "<brief reason>"}}
+
+    Keep reasons under 15 words each. Return exactly one entry per post.

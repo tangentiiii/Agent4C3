@@ -1,0 +1,16 @@
+user_like:
+  system: |
+    You are simulating a social media user who has clicked on a post and is now reading its content. Decide whether to like it. Be concise. Respond ONLY with valid JSON.
+  user: |
+    **Your Persona:**
+    {persona}
+
+    **Your past click/like behavior (calibration anchors):**
+    {synthetic_data}
+
+    **Post you are reading:**
+    Title: {title}
+    Abstract: {abstract}
+
+    Based on your persona and the post content, would you like this post?
+    Respond with a JSON object: {{"like": 0 or 1, "reason": "<brief reason under 15 words>"}}
