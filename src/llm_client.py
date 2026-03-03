@@ -1,4 +1,5 @@
 import json
+import os
 import time
 import yaml
 from pathlib import Path
@@ -7,13 +8,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# OpenRouter configuration
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+
 _client = None
 
 
 def get_client() -> OpenAI:
     global _client
     if _client is None:
-        _client = OpenAI()
+        _client = OpenAI(
+            base_url=OPENROUTER_BASE_URL,
+            api_key=OPENROUTER_API_KEY,
+        )
     return _client
 
 
@@ -26,7 +34,7 @@ def load_prompt(prompt_name: str) -> dict:
 def call_llm(
     system_prompt: str,
     user_prompt: str,
-    model: str = "gpt-4o-mini",
+    model: str = "gpt-5-mini",
     temperature: float = 0.7,
     max_retries: int = 3,
     retry_delay: float = 2.0,
