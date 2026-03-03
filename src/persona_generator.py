@@ -15,7 +15,7 @@ def load_config() -> dict:
 
 
 def format_user_history(user: dict, max_posts: int = 10, max_comments: int = 20) -> str:
-    """Format a user's history into a string for the LLM prompt."""
+    """Format a user's history from JSON/dict into a string for the LLM prompt."""
     lines = []
     posts = user["posts"][:max_posts]
     if posts:

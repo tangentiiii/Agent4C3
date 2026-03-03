@@ -55,7 +55,8 @@ def run_simulation(config: dict):
 
     users = load_users(config)
     creators = create_creators(config)
-    mechanism = get_mechanism(config["simulation"]["reward_mechanism"])
+    mechanism_params = config["simulation"].get("mechanism_params")
+    mechanism = get_mechanism(config["simulation"]["reward_mechanism"], mechanism_params)
     num_rounds = config["simulation"]["num_rounds"]
     creator_ids = [c.creator_id for c in creators]
 

@@ -12,7 +12,24 @@ data:
 simulation:
   num_creators: 5
   num_rounds: 5
+  # Available mechanisms:
+  #   M3 class (需要 mechanism_params 中的 K 和 beta):
+  #     "M3_expo", "M3_enga"
+  #   M3 class (无需 mechanism_params):
+  #     "M3_0"
+  #   BRCM class (无需 mechanism_params):
+  #     "BRCM_opt", "BRCM_star", "BRCM_1"
+  #   Baseline (无需 mechanism_params):
+  #     "default" (simple like count)
+  #
+  # 注意: 仅 M3_expo 和 M3_enga 需要 mechanism_params。
+  #       使用其他机制时，请将 mechanism_params 设为空 {}，否则会报错。
   reward_mechanism: "default"
+  mechanism_params: {}
+  # 若使用 M3_expo 或 M3_enga，取消下面两行注释并注释掉上面的空 {}：
+  # mechanism_params:
+  #   K: 5
+  #   beta: 0.05
 
 content:
   title_word_limit: 15
