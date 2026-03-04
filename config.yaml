@@ -38,3 +38,20 @@ concurrency:
 content:
   title_word_limit: 15
   abstract_word_limit: 100
+  reward_tiers:
+    - name: very_low
+      min: 0
+      max: 0
+      description: "No traction. Your recent content is not resonating at all."
+    - name: low
+      min: 1
+      max: 2
+      description: "Weak traction. Consider stronger hooks or a meaningful topic shift."
+    - name: medium
+      min: 3
+      max: 5
+      description: "Moderate traction. Keep improving what works with clear refinements."
+    - name: high
+      min: 6
+      max: null
+      description: "Strong traction. Double down on successful patterns and quality."

@@ -134,7 +134,12 @@ def run_simulation(config: dict):
         for creator in creators:
             post = next(p for p in current_posts if p["creator_id"] == creator.creator_id)
             creator.record_reward(
-                {"title": post["title"], "abstract": post["abstract"]},
+                {
+                    "title": post["title"],
+                    "abstract": post["abstract"],
+                    "next_strategy": post.get("next_strategy", ""),
+                    "topic": post.get("topic", ""),
+                },
                 rewards[creator.creator_id],
             )
 
@@ -181,6 +186,8 @@ def _save_round(
 
         structured_posts.append({
             "creator_id": cid,
+            "next_strategy": post.get("next_strategy", ""),
+            "topic": post.get("topic", ""),
             "title": post["title"],
             "abstract": post["abstract"],
             "clicks": clicks,
