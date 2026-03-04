@@ -18,7 +18,7 @@ creator_post:
     {history}
 
     Based on this history, write a new post that you believe will maximize your reward (likes).
-    Analyze what worked and what didn't, then craft your best response.
+    Analyze what worked and what didn't. You may pivot to a new topics if neccessary. Then craft your best response.
 
     Constraints:
     - Title: at most {title_word_limit} words

@@ -17,19 +17,26 @@ generate_persona:
     Create a "Social Media Persona" for an LLM agent based on this interaction history.
     The agent will act as a user who clicks and rates other people's posts.
 
-    Generate two specific PERSONA-REASON pairs, and classify this user's Big Five personality traits using three tiers: [Low, Medium, High].
+    Generate two specific PERSONA-REASON pairs, infer ACTIVITY and DIVERSITY tiers, and classify this user's Big Five personality traits using three tiers: [Low, Medium, High].
     You MUST use the definitions provided below for each tier.
 
     Follow these instructions:
     1. PERSONA: Identify "Conversational Style" and "Core Interests".
-    2. BIG FIVE TIERING (Use these specific definitions):
+    2. ACTIVITY & DIVERSITY TIERING:
+       - The activity characteristic pertains to the frequency of the user's post-reading habits.
+       - The diversity characteristic gauges the likelihood of reading posts that may not align with his usual taste.
+       - Activity tiers:
+         [High: Frequently reads/clicks many posts; Medium: Selective but regular reader; Low: Rarely reads/clicks, highly selective]
+       - Diversity tiers:
+         [High: Often explores off-interest topics; Medium: Occasionally explores nearby topics; Low: Stays mostly within usual interests]
+    3. BIG FIVE TIERING (Use these specific definitions):
        - Openness: [High: Creative explorer/abstract; Medium: Curious but practical; Low: Realist/traditionalist]
        - Conscientiousness: [High: Organized/disciplined; Medium: Reliable/flexible; Low: Spontaneous/winging it]
        - Extraversion: [High: Socialite/energized; Medium: Ambivert/needs downtime; Low: Reserved/prefers solitude]
        - Agreeableness: [High: Peacemaker/harmonious; Medium: Cooperative but firm; Low: Challenger/values efficiency]
        - Neuroticism: [High: Sensitive/worrier; Medium: Bounces back from stress; Low: Emotionally steady/calm]
-
-    3. FORMAT: Your answer should be really concise (under 200 words total).
+    4.Your goal is to identify what makes this user unique; do not default to 'Medium' unless the evidence is truly neutral.
+    5.FORMAT: Your answer should be really concise (under 220 words total).
     Strictly follow the output format below:
 
     CONVERSATIONAL_STYLE: <several words summarizing the conversational style>
@@ -37,6 +44,9 @@ generate_persona:
 
     CORE_INTERESTS: <several topics that the user prefers>
     REASON: <brief justification based on history>
+
+    ACTIVITY: [Low/Medium/High] - <brief behavioral description>
+    DIVERSITY: [Low/Medium/High] - <brief behavioral description>
 
     BIG FIVE PERSONALITY PROFILE:
     - Openness: [Tier] - <brief description>

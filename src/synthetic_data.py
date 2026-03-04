@@ -21,6 +21,16 @@ def format_persona(persona: dict) -> str:
         lines.append(f"Conversational Style: {persona['conversational_style']}")
     if "core_interests" in persona:
         lines.append(f"Core Interests: {persona['core_interests']}")
+    if "activity" in persona and isinstance(persona["activity"], dict):
+        activity = persona["activity"]
+        lines.append(
+            f"Activity: [{activity.get('tier', 'Unknown')}] {activity.get('description', '')}".strip()
+        )
+    if "diversity" in persona and isinstance(persona["diversity"], dict):
+        diversity = persona["diversity"]
+        lines.append(
+            f"Diversity: [{diversity.get('tier', 'Unknown')}] {diversity.get('description', '')}".strip()
+        )
     if "big_five" in persona:
         lines.append("Big Five Personality:")
         for trait, info in persona["big_five"].items():

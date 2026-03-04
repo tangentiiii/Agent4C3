@@ -52,6 +52,20 @@ def parse_persona(raw_text: str) -> dict:
         persona["style_reason"] = reasons[0].strip()
         persona["interests_reason"] = reasons[1].strip()
 
+    activity_match = re.search(r"ACTIVITY:\s*\[(\w+)\]\s*-?\s*(.*)", raw_text)
+    if activity_match:
+        persona["activity"] = {
+            "tier": activity_match.group(1).strip(),
+            "description": activity_match.group(2).strip(),
+        }
+
+    diversity_match = re.search(r"DIVERSITY:\s*\[(\w+)\]\s*-?\s*(.*)", raw_text)
+    if diversity_match:
+        persona["diversity"] = {
+            "tier": diversity_match.group(1).strip(),
+            "description": diversity_match.group(2).strip(),
+        }
+
     big_five = {}
     for trait in ["Openness", "Conscientiousness", "Extraversion", "Agreeableness", "Neuroticism"]:
         match = re.search(rf"-\s*{trait}:\s*\[(\w+)\]\s*-?\s*(.*)", raw_text)
