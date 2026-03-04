@@ -1,6 +1,10 @@
 # Data
 data/
 
+# Local information (keep locally only)
+information/
+results/
+
 # Environment variables
 .env
 
