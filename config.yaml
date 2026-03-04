@@ -7,8 +7,8 @@ model:
 
 data:
   min_user_interactions: 5
-  max_users: 50
-  synthetic_sample_size: 20
+  max_users: 5
+  synthetic_sample_size: 10
 
 simulation:
   num_creators: 5

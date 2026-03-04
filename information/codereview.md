@@ -26,6 +26,17 @@
 
 
 
+输出的结果`click_like_data.json`中，出现以下问题：
+
++ `"text": "1."`, text的值只是一个序号
++ `"text": "[deleted]"`, text的值是一个[deleted] tag
++ `"text": ""`,text的值是空串
++ `"text": "[removed]"`, text的值是一个[removed] tag
+
+需要添加数据的过滤。
+
+
+
 ### user_click.yml
 
 ```yaml
@@ -35,3 +46,6 @@ Respond with a JSON object: {{"clicks": [<list of 0-indexed post numbers you wou
 LLM能够按照要求输出吗？
 
 没有要求输出reason，需不需要？
+
+
+

@@ -1,10 +1,29 @@
 import json
+import re
 from pathlib import Path
 from collections import defaultdict
 
 import yaml
 from convokit import Corpus, download
 from tqdm import tqdm
+
+MEANINGLESS_PATTERNS = re.compile(
+    r"^\[deleted]$|^\[removed]$|^\[removed by reddit]$",
+    re.IGNORECASE,
+)
+MIN_TEXT_LENGTH = 5
+
+
+def is_meaningful_text(text: str) -> bool:
+    """Return True if text carries real content worth keeping."""
+    if not text or not text.strip():
+        return False
+    cleaned = text.strip()
+    if MEANINGLESS_PATTERNS.match(cleaned):
+        return False
+    if len(cleaned) < MIN_TEXT_LENGTH:
+        return False
+    return True
 
 
 def load_config() -> dict:
@@ -31,8 +50,11 @@ def extract_user_data(corpus: Corpus, min_interactions: int = 5) -> list[dict]:
     for utt in tqdm(corpus.iter_utterances(), desc="Processing utterances"):
         speaker_name = utt.speaker.id
         if utt.reply_to is None:
-            user_posts[speaker_name].append(utt.text)
+            if is_meaningful_text(utt.text):
+                user_posts[speaker_name].append(utt.text)
         else:
+            if not is_meaningful_text(utt.text):
+                continue
             parent = utterance_map.get(utt.reply_to)
             parent_text = parent.text if parent else ""
             user_comments[speaker_name].append({
@@ -68,7 +90,7 @@ def collect_all_posts(corpus: Corpus) -> list[str]:
     """Collect all post titles/texts for use in synthetic data generation."""
     posts = []
     for utt in corpus.iter_utterances():
-        if utt.reply_to is None:
+        if utt.reply_to is None and is_meaningful_text(utt.text):
             posts.append(utt.text)
     return posts
 
@@ -83,7 +105,10 @@ def main():
     base_dir = Path(__file__).parent.parent / "data"
     save_user_data(users, base_dir / "processed" / "user_data.json")
 
+    total_raw_posts = sum(1 for utt in corpus.iter_utterances() if utt.reply_to is None)
     all_posts = collect_all_posts(corpus)
+    print(f"Filtered posts: {total_raw_posts} raw -> {len(all_posts)} meaningful "
+          f"({total_raw_posts - len(all_posts)} removed)")
     with open(base_dir / "processed" / "all_posts.json", "w", encoding="utf-8") as f:
         json.dump(all_posts, f, ensure_ascii=False, indent=2)
     print(f"Saved {len(all_posts)} posts to all_posts.json")
