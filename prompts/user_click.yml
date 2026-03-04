@@ -15,6 +15,6 @@ user_click:
     {post_titles}
 
     For each post title, decide whether you would click on it to read more.
-    For every post you choose to click, provide a brief reason (1 sentence) explaining why it caught your attention.
-    Respond with a JSON object: {{"clicks": [{{"post": <0-indexed post number>, "reason": "<brief reason>"}}]}}
-    Only click on posts that genuinely match your interests and browsing patterns.
+    For every post title (including those you would NOT click), provide a brief reason (1 sentence).
+    Respond with a JSON object: {{"decisions": [{{"post": <0-indexed post number>, "click": <0 or 1>, "reason": "<brief reason>"}}]}}
+    Only click on posts that match your interests and browsing patterns.

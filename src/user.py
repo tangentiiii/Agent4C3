@@ -78,19 +78,33 @@ class User:
             temperature=self._config["model"]["temperature"],
         )
 
-        raw_clicks = response.get("clicks", [])
         valid_indices = []
         reasons: dict[int, str] = {}
-        for item in raw_clicks:
-            if isinstance(item, dict):
+        raw_decisions = response.get("decisions", [])
+        if isinstance(raw_decisions, list) and raw_decisions:
+            for item in raw_decisions:
+                if not isinstance(item, dict):
+                    continue
                 idx = item.get("post")
+                click = item.get("click", 0)
                 reason = item.get("reason", "")
-            else:
-                idx = item
-                reason = ""
-            if isinstance(idx, int) and 0 <= idx < len(posts):
-                valid_indices.append(idx)
-                reasons[idx] = reason
+                if isinstance(idx, int) and 0 <= idx < len(posts):
+                    reasons[idx] = reason
+                    if click:
+                        valid_indices.append(idx)
+        else:
+            # Backward compatibility with previous output schema.
+            raw_clicks = response.get("clicks", [])
+            for item in raw_clicks:
+                if isinstance(item, dict):
+                    idx = item.get("post")
+                    reason = item.get("reason", "")
+                else:
+                    idx = item
+                    reason = ""
+                if isinstance(idx, int) and 0 <= idx < len(posts):
+                    valid_indices.append(idx)
+                    reasons[idx] = reason
         return valid_indices, reasons
 
     def like(self, title: str, abstract: str) -> bool:
@@ -153,6 +167,7 @@ class User:
                     "title": post["title"],
                     "creator_id": post["creator_id"],
                     "click": 0,
+                    "click_reason": click_reasons.get(i, ""),
                 })
 
         self.history.extend(interactions)

@@ -177,6 +177,7 @@ def _save_round(
             else:
                 clicks[uname] = 0
                 likes[uname] = 0
+                click_reasons[uname] = record.get("click_reason", "") if record else ""
 
         structured_posts.append({
             "creator_id": cid,
