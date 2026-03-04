@@ -50,10 +50,10 @@ class User:
         self.history: list[dict] = []
         self._config = _load_config()
 
-    def click(self, posts: list[dict]) -> list[int]:
+    def click(self, posts: list[dict]) -> tuple[list[int], dict[int, str]]:
         """
         Decide which posts to click given a list of posts with titles.
-        Returns list of indices (0-based) that the user clicks on.
+        Returns (list of clicked indices, dict mapping index -> reason).
         """
         prompt_data = load_prompt("user_click")
         system_prompt = prompt_data["user_click"]["system"]
@@ -78,9 +78,20 @@ class User:
             temperature=self._config["model"]["temperature"],
         )
 
-        clicked_indices = response.get("clicks", [])
-        valid_indices = [i for i in clicked_indices if 0 <= i < len(posts)]
-        return valid_indices
+        raw_clicks = response.get("clicks", [])
+        valid_indices = []
+        reasons: dict[int, str] = {}
+        for item in raw_clicks:
+            if isinstance(item, dict):
+                idx = item.get("post")
+                reason = item.get("reason", "")
+            else:
+                idx = item
+                reason = ""
+            if isinstance(idx, int) and 0 <= idx < len(posts):
+                valid_indices.append(idx)
+                reasons[idx] = reason
+        return valid_indices, reasons
 
     def like(self, title: str, abstract: str) -> bool:
         """Decide whether to like a post after reading its abstract."""
@@ -111,7 +122,8 @@ class User:
         Like calls for clicked posts are issued concurrently.
         Returns interaction records for this round.
         """
-        clicked_indices = set(self.click(posts))
+        clicked_indices_list, click_reasons = self.click(posts)
+        clicked_indices = set(clicked_indices_list)
 
         like_results: dict[int, bool] = {}
         clicked_posts = [(i, posts[i]) for i in range(len(posts)) if i in clicked_indices]
@@ -133,6 +145,7 @@ class User:
                     "title": post["title"],
                     "creator_id": post["creator_id"],
                     "click": 1,
+                    "click_reason": click_reasons.get(i, ""),
                     "like": 1 if like_results[i] else 0,
                 })
             else:

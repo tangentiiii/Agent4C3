@@ -163,6 +163,7 @@ def _save_round(
 
         clicks = {}
         likes = {}
+        click_reasons = {}
         for uname in user_names:
             record = next(
                 (i for i in interactions
@@ -172,6 +173,7 @@ def _save_round(
             if record and record.get("click") == 1:
                 clicks[uname] = 1
                 likes[uname] = record.get("like", 0)
+                click_reasons[uname] = record.get("click_reason", "")
             else:
                 clicks[uname] = 0
                 likes[uname] = 0
@@ -181,6 +183,7 @@ def _save_round(
             "title": post["title"],
             "abstract": post["abstract"],
             "clicks": clicks,
+            "click_reasons": click_reasons,
             "likes": likes,
             "reward": rewards.get(cid),
         })
