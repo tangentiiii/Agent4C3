@@ -1,4 +1,5 @@
 import json
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import yaml
 from pathlib import Path
@@ -104,30 +105,42 @@ class User:
 
         return bool(response.get("like", 0))
 
-    def process_posts(self, posts: list[dict]) -> list[dict]:
+    def process_posts(self, posts: list[dict], max_workers: int = 10) -> list[dict]:
         """
         Full user action cycle: observe titles, click, then like/dislike.
+        Like calls for clicked posts are issued concurrently.
         Returns interaction records for this round.
         """
-        clicked_indices = self.click(posts)
-        interactions = []
+        clicked_indices = set(self.click(posts))
 
+        like_results: dict[int, bool] = {}
+        clicked_posts = [(i, posts[i]) for i in range(len(posts)) if i in clicked_indices]
+
+        if clicked_posts:
+            with ThreadPoolExecutor(max_workers=max_workers) as executor:
+                future_to_idx = {
+                    executor.submit(self.like, p["title"], p["abstract"]): i
+                    for i, p in clicked_posts
+                }
+                for future in as_completed(future_to_idx):
+                    idx = future_to_idx[future]
+                    like_results[idx] = future.result()
+
+        interactions = []
         for i, post in enumerate(posts):
             if i in clicked_indices:
-                liked = self.like(post["title"], post["abstract"])
-                record = {
+                interactions.append({
                     "title": post["title"],
                     "creator_id": post["creator_id"],
                     "click": 1,
-                    "like": 1 if liked else 0,
-                }
+                    "like": 1 if like_results[i] else 0,
+                })
             else:
-                record = {
+                interactions.append({
                     "title": post["title"],
                     "creator_id": post["creator_id"],
                     "click": 0,
-                }
-            interactions.append(record)
+                })
 
         self.history.extend(interactions)
         return interactions

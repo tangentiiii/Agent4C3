@@ -32,6 +32,9 @@ simulation:
   #   K: 5
   #   beta: 0.05
 
+concurrency:
+  max_workers: 10  # 最大并发 API 请求数，根据 API rate limit 调整
+
 content:
   title_word_limit: 15
   abstract_word_limit: 100
