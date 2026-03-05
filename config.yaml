@@ -1,19 +1,18 @@
 model:
-  # OpenRouter 模型名称格式: "openai/gpt-5-mini" 或直接用 "gpt-5-mini"
   name: "gpt-5-mini"
   temperature: 0.7
   max_retries: 3
   retry_delay: 2
 
 data:
-  min_user_interactions: 5
+  min_user_interactions: 10
   min_creator_interactions: 10
-  max_users: 5
+  max_users: 10
   synthetic_sample_size: 10
 
 simulation:
-  num_creators: 5
-  num_rounds: 5
+  num_creators: 10
+  num_rounds: 10
   # Available mechanisms:
   #   M3 class (需要 mechanism_params 中的 K 和 beta):
   #     "M3_expo", "M3_enga"
@@ -42,17 +41,17 @@ content:
   reward_tiers:
     - name: very_low
       min: 0
-      max: 0
+      max: 2
       description: "No traction. Your recent content is not resonating at all."
     - name: low
-      min: 1
-      max: 2
+      min: 3
+      max: 6
       description: "Weak traction. Consider stronger hooks or a meaningful topic shift."
     - name: medium
-      min: 3
-      max: 5
+      min: 7
+      max: 8
       description: "Moderate traction. Keep improving what works with clear refinements."
     - name: high
-      min: 6
+      min: 9
       max: null
       description: "Strong traction. Double down on successful patterns and quality."

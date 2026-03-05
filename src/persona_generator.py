@@ -1,4 +1,5 @@
 import json
+import random
 import re
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -131,8 +132,9 @@ def main():
 
     max_users = config["data"]["max_users"]
     if len(users) > max_users:
-        users = users[:max_users]
-        print(f"Limited to {max_users} users")
+        total = len(users)
+        users = random.sample(users, max_users)
+        print(f"Randomly selected {max_users} users from {total} total")
 
     personas = generate_personas(users, config)
 
