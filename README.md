@@ -1,6 +1,6 @@
-# Twitter for C3 — Minimum Prototype
+# Agent4C3 — Minimum Prototype
 
-A multi-agent social media simulation framework that studies creator–user dynamics under various reward mechanisms. LLM-powered agents act as content creators and users, enabling controlled experiments on how different incentive structures shape content creation behavior.
+A multi-agent social media simulation framework that studies creator–user dynamics and content-creator-competition(C3) under various reward mechanisms. LLM-powered agents act as content creators and users, enabling controlled experiments on how different incentive structures shape content creation behavior.
 
 ## Overview
 
