@@ -3,3 +3,6 @@ convokit
 pyyaml
 python-dotenv
 tqdm
+matplotlib
+pandas
+openpyxl

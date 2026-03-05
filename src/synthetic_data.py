@@ -1,6 +1,7 @@
 import json
 import random
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import yaml
 from tqdm import tqdm
@@ -84,12 +85,17 @@ def main():
         all_posts = json.load(f)
 
     sample_size = config["data"]["synthetic_sample_size"]
+    max_workers = config.get("concurrency", {}).get("max_workers", 10)
     all_synthetic = {}
 
-    for persona in tqdm(personas, desc="Synthesizing click/like data"):
-        user_name = persona["user_name"]
-        results = synthesize_for_user(persona, all_posts, sample_size, config)
-        all_synthetic[user_name] = results
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_name = {
+            executor.submit(synthesize_for_user, persona, all_posts, sample_size, config): persona["user_name"]
+            for persona in personas
+        }
+        for future in tqdm(as_completed(future_to_name), total=len(future_to_name), desc="Synthesizing click/like data"):
+            user_name = future_to_name[future]
+            all_synthetic[user_name] = future.result()
 
     output_path = data_dir / "synthetic" / "click_like_data.json"
     output_path.parent.mkdir(parents=True, exist_ok=True)

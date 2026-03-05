@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Twitter for C3 - Minimum Prototype
+Agent4C3 - Minimum Prototype
 Entry point for the simulation pipeline.
 
 Usage:
@@ -9,6 +9,7 @@ Usage:
     python main.py profiles   # Step 3: Generate creator profiles via LLM
     python main.py synthetic  # Step 4: Generate synthetic click/like data
     python main.py simulate   # Step 5: Run the simulation
+    python main.py analyse    # Step 6: Analyse creator rewards (Excel + plot)
     python main.py all        # Run all steps sequentially
 """
 import sys
@@ -64,12 +65,21 @@ def step_simulate():
     run_simulation(config)
 
 
+def step_analyse():
+    print("=" * 60)
+    print("STEP 6: Reward Analysis")
+    print("=" * 60)
+    from analysis.sim_reward_analysis import analyse
+    analyse()
+
+
 STEPS = {
     "prepare": step_prepare,
     "personas": step_personas,
     "profiles": step_profiles,
     "synthetic": step_synthetic,
     "simulate": step_simulate,
+    "analyse": step_analyse,
 }
 
 
