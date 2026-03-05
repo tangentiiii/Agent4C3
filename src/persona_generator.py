@@ -1,6 +1,7 @@
 import json
 import re
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import yaml
 from tqdm import tqdm
@@ -79,6 +80,24 @@ def parse_persona(raw_text: str) -> dict:
     return persona
 
 
+def _generate_single_persona(
+    user: dict, system_prompt: str, user_template: str, model: str, temperature: float,
+) -> dict:
+    history_str = format_user_history(user)
+    user_prompt = user_template.replace("{user_history_data}", history_str)
+
+    raw_response = call_llm(
+        system_prompt=system_prompt,
+        user_prompt=user_prompt,
+        model=model,
+        temperature=temperature,
+    )
+
+    persona = parse_persona(raw_response)
+    persona["user_name"] = user["user_name"]
+    return persona
+
+
 def generate_personas(users: list[dict], config: dict) -> list[dict]:
     prompt_data = load_prompt("generate_persona")
     system_prompt = prompt_data["generate_persona"]["system"]
@@ -86,22 +105,19 @@ def generate_personas(users: list[dict], config: dict) -> list[dict]:
 
     model = config["model"]["name"]
     temperature = config["model"]["temperature"]
+    max_workers = config.get("concurrency", {}).get("max_workers", 10)
 
-    personas = []
-    for user in tqdm(users, desc="Generating personas"):
-        history_str = format_user_history(user)
-        user_prompt = user_template.replace("{user_history_data}", history_str)
-
-        raw_response = call_llm(
-            system_prompt=system_prompt,
-            user_prompt=user_prompt,
-            model=model,
-            temperature=temperature,
-        )
-
-        persona = parse_persona(raw_response)
-        persona["user_name"] = user["user_name"]
-        personas.append(persona)
+    personas = [None] * len(users)
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        future_to_idx = {
+            executor.submit(
+                _generate_single_persona, user, system_prompt, user_template, model, temperature,
+            ): i
+            for i, user in enumerate(users)
+        }
+        for future in tqdm(as_completed(future_to_idx), total=len(users), desc="Generating personas"):
+            idx = future_to_idx[future]
+            personas[idx] = future.result()
 
     return personas
 

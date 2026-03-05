@@ -11,8 +11,9 @@ def _load_config() -> dict:
 
 
 class ContentCreator:
-    def __init__(self, creator_id: int):
+    def __init__(self, creator_id: int, profile: dict | None = None):
         self.creator_id = creator_id
+        self.profile = profile
         self.history: list[dict] = []  # [{post: {...}, reward: float}]
         self._config = _load_config()
         self._reward_tiers = self._build_reward_tiers()
@@ -104,6 +105,24 @@ class ContentCreator:
             return " ".join(words)
         return " ".join(words[:word_limit])
 
+    def _format_profile(self) -> str:
+        if not self.profile:
+            return "No specific profile assigned."
+        lines = []
+        if self.profile.get("tone_style"):
+            lines.append(f"Tone & Style: {self.profile['tone_style']}")
+        interests = self.profile.get("core_interests", [])
+        if interests:
+            if isinstance(interests, list):
+                lines.append(f"Core Interests: {', '.join(interests)}")
+            else:
+                lines.append(f"Core Interests: {interests}")
+        if self.profile.get("content_approach"):
+            lines.append(f"Content Approach: {self.profile['content_approach']}")
+        if self.profile.get("distinctive_traits"):
+            lines.append(f"Distinctive Traits: {self.profile['distinctive_traits']}")
+        return "\n".join(lines) if lines else "No specific profile assigned."
+
     def _format_history(self) -> str:
         lines = []
         for i, entry in enumerate(self.history):
@@ -141,6 +160,7 @@ class ContentCreator:
         user_prompt = (
             template
             .replace("{creator_id}", str(self.creator_id))
+            .replace("{profile}", self._format_profile())
             .replace("{title_word_limit}", str(title_limit))
             .replace("{abstract_word_limit}", str(abstract_limit))
             .replace("{history}", self._format_history())

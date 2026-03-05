@@ -38,8 +38,32 @@ def load_users(config: dict) -> list[User]:
     return users
 
 
+def load_creator_profiles() -> list[dict] | None:
+    profile_path = Path(__file__).parent.parent / "data" / "creator_profiles" / "creator_profiles.json"
+    if not profile_path.exists():
+        return None
+    with open(profile_path, "r") as f:
+        return json.load(f)
+
+
 def create_creators(config: dict) -> list[ContentCreator]:
     num_creators = config["simulation"]["num_creators"]
+    profiles = load_creator_profiles()
+
+    if profiles:
+        if len(profiles) < num_creators:
+            print(
+                f"Warning: only {len(profiles)} creator profiles available, "
+                f"but {num_creators} creators requested. Extra creators get no profile."
+            )
+        creators = []
+        for i in range(num_creators):
+            profile = profiles[i] if i < len(profiles) else None
+            creators.append(ContentCreator(creator_id=i, profile=profile))
+            if profile:
+                print(f"  Creator {i} <- profile from user '{profile.get('source_user', '?')}'")
+        return creators
+
     return [ContentCreator(creator_id=i) for i in range(num_creators)]
 
 

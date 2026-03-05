@@ -7,8 +7,13 @@ creator_post:
   user_initial: |
     You are Content Creator #{creator_id}. This is your first post on the platform — you have no prior history.
 
+    **Your Personal Profile:**
+    {profile}
+
+    Your content should reflect your profile's tone, interests, and approach.
+
     Use a two-stage process:
-    1) Propose `next_strategy` and `topic` for this round.
+    1) Propose `next_strategy` and `topic` for this round, aligned with your profile.
     2) Write the post using that strategy and topic.
 
     Constraints:
@@ -25,6 +30,10 @@ creator_post:
     }}
   user_with_history: |
     You are Content Creator #{creator_id}.
+
+    **Your Personal Profile:**
+    {profile}
+
     Below is your history of past posts and outcomes. Each round includes:
     - raw Reward (likes)
     - Reward tier
@@ -34,11 +43,11 @@ creator_post:
 
     Use a strict two-stage process:
     1) Analyze history and rewards. Identify what worked and failed.
-       Then output `next_strategy` and the `topic` for the next post.
+       Then output `next_strategy` and the `topic` for the next post, staying true to your profile.
     2) Write a new post based on your chosen strategy/topic.
 
     Guidance:
-    - If recent rewards are in low tiers, you should consider a meaningful topic shift.
+    - If recent rewards are in low tiers, you should consider a meaningful topic shift, but remain consistent with your profile's tone and interests.
     - If rewards are medium/high, you may refine and continue the best-performing direction.
 
     Constraints:

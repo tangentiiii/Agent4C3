@@ -1,0 +1,28 @@
+generate_creator_profile:
+  system: |
+    You are a social media analyst. Analyze a user's posting history and produce a concise content creator profile. Respond ONLY with valid JSON.
+  user: |
+    Below is a user's social media history.
+
+    **Data format:**
+    - "Posts": original posts/threads created by this user.
+    - "Comments": each entry is a (comment_text, parent_text) pair.
+      - "comment_text": what this user actually wrote.
+      - "parent_text": the post or comment they were replying to.
+
+    --- HISTORY START ---
+    {user_history_data}
+    --- HISTORY END ---
+
+    Generate a content creator profile as JSON:
+    {{
+      "tone_style": "<communication style: vocabulary, sentence structure, emotional tone>",
+      "core_interests": ["<topic1>", "<topic2>", ...],
+      "content_approach": "<how this user creates content: e.g. storytelling, data-driven, provocative questions, humor, etc.>",
+      "distinctive_traits": "<1-2 unique quirks or patterns that set this user apart>"
+    }}
+
+    Rules:
+    - core_interests: 2-4 topics only
+    - Each field: 1-2 concise sentences max
+    - Base everything strictly on observed history, not assumptions

@@ -6,8 +6,9 @@ Entry point for the simulation pipeline.
 Usage:
     python main.py prepare    # Step 1: Download & process Reddit data
     python main.py personas   # Step 2: Generate user personas via LLM
-    python main.py synthetic  # Step 3: Generate synthetic click/like data
-    python main.py simulate   # Step 4: Run the simulation
+    python main.py profiles   # Step 3: Generate creator profiles via LLM
+    python main.py synthetic  # Step 4: Generate synthetic click/like data
+    python main.py simulate   # Step 5: Run the simulation
     python main.py all        # Run all steps sequentially
 """
 import sys
@@ -38,9 +39,17 @@ def step_personas():
     persona_main()
 
 
+def step_profiles():
+    print("=" * 60)
+    print("STEP 3: Creator Profile Generation")
+    print("=" * 60)
+    from src.creator_profile_generator import main as profile_main
+    profile_main()
+
+
 def step_synthetic():
     print("=" * 60)
-    print("STEP 3: Synthetic Click/Like Data")
+    print("STEP 4: Synthetic Click/Like Data")
     print("=" * 60)
     from src.synthetic_data import main as synthetic_main
     synthetic_main()
@@ -48,7 +57,7 @@ def step_synthetic():
 
 def step_simulate():
     print("=" * 60)
-    print("STEP 4: Simulation")
+    print("STEP 5: Simulation")
     print("=" * 60)
     from src.simulation import load_config, run_simulation
     config = load_config()
@@ -58,6 +67,7 @@ def step_simulate():
 STEPS = {
     "prepare": step_prepare,
     "personas": step_personas,
+    "profiles": step_profiles,
     "synthetic": step_synthetic,
     "simulate": step_simulate,
 }
