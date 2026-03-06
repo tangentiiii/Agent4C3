@@ -12,6 +12,7 @@ Usage:
     python main.py analyse    # Step 6: Analyse creator rewards (Excel + plot)
     python main.py all        # Run all steps sequentially
 """
+import random
 import sys
 
 import yaml
@@ -87,6 +88,11 @@ def main():
     if len(sys.argv) < 2:
         print(__doc__)
         sys.exit(1)
+
+    config = load_config()
+    seed = config.get("seed", 42)
+    random.seed(seed)
+    print(f"Random seed set to {seed}")
 
     command = sys.argv[1].lower()
 

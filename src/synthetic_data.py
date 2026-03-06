@@ -48,18 +48,15 @@ def format_posts_for_prompt(posts: list[str]) -> str:
 
 def synthesize_for_user(
     persona: dict,
-    all_posts: list[str],
-    sample_size: int,
+    sampled_posts: list[str],
     config: dict,
 ) -> list[dict]:
     prompt_data = load_prompt("synthesize_click_like")
     system_prompt = prompt_data["synthesize_click_like"]["system"]
     user_template = prompt_data["synthesize_click_like"]["user"]
 
-    sampled = random.sample(all_posts, min(sample_size, len(all_posts)))
-
     persona_str = format_persona(persona)
-    posts_str = format_posts_for_prompt(sampled)
+    posts_str = format_posts_for_prompt(sampled_posts)
 
     user_prompt = user_template.replace("{persona}", persona_str).replace("{posts}", posts_str)
 
@@ -84,13 +81,21 @@ def main():
     with open(data_dir / "processed" / "all_posts.json", "r") as f:
         all_posts = json.load(f)
 
+    random.seed(config.get("seed", 42))
+
     sample_size = config["data"]["synthetic_sample_size"]
     max_workers = config.get("concurrency", {}).get("max_workers", 10)
     all_synthetic = {}
 
+    actual_sample_size = min(sample_size, len(all_posts))
+    pre_sampled = {
+        persona["user_name"]: random.sample(all_posts, actual_sample_size)
+        for persona in personas
+    }
+
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_name = {
-            executor.submit(synthesize_for_user, persona, all_posts, sample_size, config): persona["user_name"]
+            executor.submit(synthesize_for_user, persona, pre_sampled[persona["user_name"]], config): persona["user_name"]
             for persona in personas
         }
         for future in tqdm(as_completed(future_to_name), total=len(future_to_name), desc="Synthesizing click/like data"):

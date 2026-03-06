@@ -130,6 +130,8 @@ def main():
     with open(data_dir / "processed" / "user_data.json", "r") as f:
         users = json.load(f)
 
+    random.seed(config.get("seed", 42))
+
     max_users = config["data"]["max_users"]
     if len(users) > max_users:
         total = len(users)

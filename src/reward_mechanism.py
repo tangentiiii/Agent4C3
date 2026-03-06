@@ -39,7 +39,7 @@ class DefaultMechanism(RewardMechanism):
             if record.get("click") == 1 and record.get("like") == 1:
                 likes[record["creator_id"]] += 1
 
-        return {cid: float(likes.get(cid, 0)) for cid in creator_ids}
+        return {cid: float(likes.get(cid, 0)) for cid in creator_ids} #补全没有收到like（reward为0的）creator
 
 
 # ---------------------------------------------------------
@@ -80,6 +80,17 @@ class AveragedUserMechanism(RewardMechanism):
 
     @abstractmethod
     def compute_user_rewards(self, scores_dict: dict[int, float], creator_ids: list[int]) -> dict[int, float]:
+        """
+        计算单个用户对各创作者触发的奖励。
+
+        Args:
+            scores_dict: 该用户对每个创作者的匹配分数，
+                {creator_id: score}，score 为 1.0（click 且 like）或 0.0。
+            creator_ids: 所有创作者的 ID 列表。
+
+        Returns:
+            dict 映射 creator_id -> 该用户为其贡献的奖励值。
+        """
         pass
 
 

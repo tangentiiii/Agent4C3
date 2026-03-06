@@ -92,6 +92,8 @@ def main():
     config = load_config()
     data_dir = Path(__file__).parent.parent / "data"
 
+    random.seed(config.get("seed", 42))
+
     eligible_users = load_eligible_users(config)
     num_creators = config["simulation"]["num_creators"]
     sampled = sample_users(eligible_users, num_creators)
