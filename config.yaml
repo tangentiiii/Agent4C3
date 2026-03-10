@@ -34,6 +34,13 @@ simulation:
   #   K: 5
   #   beta: 0.05
 
+evaluation:
+  max_eval_users: 10
+  test_ratio: 0.2                         # conversation 级别 train/test 划分比例，20% 作为测试集
+  min_comments_after_split: 5              # 移除测试 thread 评论后，用户至少需保留的评论数，低于此数则排除
+  k: 10                                   # 候选 post 总数
+  n: 3                                    # k 个候选中正样本数量，LLM 需从 k 个中找出这 n 个
+
 concurrency:
   max_workers: 10  # 最大并发 API 请求数，根据 API rate limit 调整
 

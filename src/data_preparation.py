@@ -60,6 +60,7 @@ def extract_user_data(corpus: Corpus, min_interactions: int = 5) -> list[dict]:
             user_comments[speaker_name].append({
                 "comment_text": utt.text,
                 "parent_text": parent_text,
+                "conversation_id": utt.conversation_id,
             })
 
     all_speakers = set(user_posts.keys()) | set(user_comments.keys())
@@ -95,6 +96,20 @@ def collect_all_posts(corpus: Corpus) -> list[str]:
     return posts
 
 
+def collect_all_posts_meta(corpus: Corpus) -> list[dict]:
+    """Collect all posts with rich metadata for evaluation."""
+    posts = []
+    for utt in corpus.iter_utterances():
+        if utt.reply_to is None and is_meaningful_text(utt.text):
+            conv = utt.get_conversation()
+            posts.append({
+                "text": utt.text,
+                "conversation_id": utt.conversation_id,
+                "subreddit": conv.meta.get("subreddit", ""),
+            })
+    return posts
+
+
 def main():
     config = load_config()
     corpus = download_corpus()
@@ -112,6 +127,11 @@ def main():
     with open(base_dir / "processed" / "all_posts.json", "w", encoding="utf-8") as f:
         json.dump(all_posts, f, ensure_ascii=False, indent=2)
     print(f"Saved {len(all_posts)} posts to all_posts.json")
+
+    all_posts_meta = collect_all_posts_meta(corpus)
+    with open(base_dir / "processed" / "all_posts_meta.json", "w", encoding="utf-8") as f:
+        json.dump(all_posts_meta, f, ensure_ascii=False, indent=2)
+    print(f"Saved {len(all_posts_meta)} posts with metadata to all_posts_meta.json")
 
 
 if __name__ == "__main__":

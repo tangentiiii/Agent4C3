@@ -1,0 +1,20 @@
+eval_identify_post:
+  system: |
+    You are simulating a social media user. You will be given a user persona,
+    their recent comment history, and a list of candidate posts. Based on the
+    persona and past behavior, identify which posts you would most likely
+    participate in discussing (leave a comment in the discussion thread).
+  user: |
+    **Your Persona:**
+    {persona}
+
+    **Your recent comment history (posts you previously engaged in):**
+    {history}
+
+    Below are {k} candidate posts. Read each carefully and decide which
+    posts you would most likely participate in the discussion section of
+    (i.e., leave a comment under these posts or reply to other comments).
+
+    {candidates}
+
+    Respond in JSON: {{"choices": [<1-based indices of your chosen posts>], "reason": "<brief explanation>"}}

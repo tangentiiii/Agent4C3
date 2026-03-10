@@ -4,13 +4,18 @@ Agent4C3 - Minimum Prototype
 Entry point for the simulation pipeline.
 
 Usage:
-    python main.py prepare    # Step 1: Download & process Reddit data
-    python main.py personas   # Step 2: Generate user personas via LLM
-    python main.py profiles   # Step 3: Generate creator profiles via LLM
-    python main.py synthetic  # Step 4: Generate synthetic click/like data
-    python main.py simulate   # Step 5: Run the simulation
-    python main.py analyse    # Step 6: Analyse creator rewards (Excel + plot)
-    python main.py all        # Run all steps sequentially
+    python main.py prepare       # Step 1: Download & process Reddit data
+    python main.py personas      # Step 2: Generate user personas via LLM
+    python main.py profiles      # Step 3: Generate creator profiles via LLM
+    python main.py synthetic     # Step 4: Generate synthetic click/like data
+    python main.py simulate      # Step 5: Run the simulation
+    python main.py analyse       # Step 6: Analyse creator rewards (Excel + plot)
+    python main.py all           # Run all steps sequentially
+
+    python main.py eval-prepare  # Eval: Re-run data prep + build eval dataset
+    python main.py eval-personas # Eval: Generate personas for eval users
+    python main.py eval-run      # Eval: Run K-choose-1 evaluation + analyze
+    python main.py eval-all      # Eval: Run all eval steps sequentially
 """
 import random
 import sys
@@ -74,6 +79,36 @@ def step_analyse():
     analyse()
 
 
+def step_eval_prepare():
+    print("=" * 60)
+    print("EVAL: Data Preparation + Build Eval Dataset")
+    print("=" * 60)
+    from src.data_preparation import main as prepare_main
+    prepare_main()
+    print()
+    from src.evaluation.build_eval_data import main as build_eval_main
+    build_eval_main()
+
+
+def step_eval_personas():
+    print("=" * 60)
+    print("EVAL: Generate Eval Personas")
+    print("=" * 60)
+    from src.evaluation.generate_eval_personas import main as gen_eval_personas_main
+    gen_eval_personas_main()
+
+
+def step_eval_run():
+    print("=" * 60)
+    print("EVAL: Run Evaluation + Analyze")
+    print("=" * 60)
+    from src.evaluation.run_eval import main as run_eval_main
+    run_eval_main()
+    print()
+    from src.evaluation.analyze_eval import main as analyze_eval_main
+    analyze_eval_main()
+
+
 STEPS = {
     "prepare": step_prepare,
     "personas": step_personas,
@@ -81,7 +116,13 @@ STEPS = {
     "synthetic": step_synthetic,
     "simulate": step_simulate,
     "analyse": step_analyse,
+    "eval-prepare": step_eval_prepare,
+    "eval-personas": step_eval_personas,
+    "eval-run": step_eval_run,
 }
+
+EVAL_STEPS = ["eval-prepare", "eval-personas", "eval-run"]
+SIM_STEPS = ["prepare", "personas", "profiles", "synthetic", "simulate", "analyse"]
 
 
 def main():
@@ -97,14 +138,18 @@ def main():
     command = sys.argv[1].lower()
 
     if command == "all":
-        for name, func in STEPS.items():
-            func()
+        for name in SIM_STEPS:
+            STEPS[name]()
+            print()
+    elif command == "eval-all":
+        for name in EVAL_STEPS:
+            STEPS[name]()
             print()
     elif command in STEPS:
         STEPS[command]()
     else:
         print(f"Unknown command: {command}")
-        print(f"Available: {', '.join(STEPS.keys())}, all")
+        print(f"Available: {', '.join(STEPS.keys())}, all, eval-all")
         sys.exit(1)
 
 
