@@ -11,7 +11,8 @@ eval_identify_post:
     **Your recent comment history (posts you previously engaged in):**
     {history}
 
-    Below are {k} candidate posts. Read each carefully and decide which
+    Below are {k} candidate posts, among which {n} are posts you would
+    actually participate in. Read each carefully and decide which
     posts you would most likely participate in the discussion section of
     (i.e., leave a comment under these posts or reply to other comments).
 

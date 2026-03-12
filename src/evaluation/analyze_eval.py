@@ -1,6 +1,11 @@
 """
 Analyze K-choose-N evaluation results: precision, recall, exact match, and breakdowns.
+
+Usage:
+    python -m src.evaluation.analyze_eval                    # Analyze latest run
+    python -m src.evaluation.analyze_eval 3_12_10_30        # Analyze specific run by timestamp folder
 """
+import argparse
 import json
 from pathlib import Path
 from collections import defaultdict
@@ -57,11 +62,50 @@ def _print_metrics(label: str, metrics: dict, k: int, n: int):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Analyze evaluation results")
+    parser.add_argument(
+        "timestamp",
+        nargs="?",
+        help="Timestamp folder name (e.g., 3_12_10_30). If not provided, lists available runs.",
+    )
+    args = parser.parse_args()
+
     config = load_config()
     base_dir = Path(__file__).parent.parent.parent / "data"
     eval_dir = base_dir / "evaluation"
 
-    with open(eval_dir / "eval_results.json", "r") as f:
+    if args.timestamp:
+        run_dir = eval_dir / args.timestamp
+        if not run_dir.exists():
+            print(f"Error: Run folder '{args.timestamp}' not found in {eval_dir}")
+            return
+    else:
+        # List available runs and prompt user to choose one
+        run_dirs = sorted([d for d in eval_dir.iterdir() if d.is_dir() and d.name[0].isdigit()])
+        if not run_dirs:
+            print(f"No evaluation runs found in {eval_dir}")
+            return
+        print("Available runs:")
+        for i, d in enumerate(run_dirs):
+            print(f"  {i + 1}. {d.name}")
+        choice = input("\nEnter run number to analyze (or press Enter for latest): ").strip()
+        if choice:
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(run_dirs):
+                    run_dir = run_dirs[idx]
+                else:
+                    print("Invalid selection.")
+                    return
+            except ValueError:
+                print("Invalid input.")
+                return
+        else:
+            run_dir = run_dirs[-1]  # Latest run
+
+    print(f"\nAnalyzing results from: {run_dir.name}")
+
+    with open(run_dir / "eval_results.json", "r") as f:
         results = json.load(f)
 
     with open(eval_dir / "eval_users.json", "r") as f:
@@ -118,7 +162,7 @@ def main():
     # --- Export to Excel ---
     try:
         import openpyxl
-        _export_excel(results, eval_users, posts_by_conv, eval_dir, k, n)
+        _export_excel(results, eval_users, posts_by_conv, run_dir, k, n)
     except ImportError:
         print("\nopenpyxl not installed — skipping Excel export.")
 

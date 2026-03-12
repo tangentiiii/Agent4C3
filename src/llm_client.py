@@ -56,7 +56,10 @@ def call_llm(
     for attempt in range(max_retries):
         try:
             response = client.chat.completions.create(**kwargs)
-            return response.choices[0].message.content
+            content = response.choices[0].message.content
+            if content is None:
+                raise ValueError("LLM returned empty content (possibly filtered)")
+            return content
         except Exception as e:
             if attempt < max_retries - 1:
                 print(f"LLM call failed (attempt {attempt + 1}): {e}")

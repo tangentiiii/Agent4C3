@@ -37,8 +37,11 @@ def format_user_history(user: dict, max_posts: int = 10, max_comments: int = 20)
     return "\n".join(lines)
 
 
-def parse_persona(raw_text: str) -> dict:
+def parse_persona(raw_text: str | None) -> dict:
     """Parse the LLM's persona output into a structured dict."""
+    if raw_text is None:
+        raise ValueError("LLM returned None for persona generation")
+
     persona = {"raw": raw_text}
 
     style_match = re.search(r"CONVERSATIONAL_STYLE:\s*(.+)", raw_text)

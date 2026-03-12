@@ -4,9 +4,12 @@ Run K-choose-N post identification evaluation.
 For each eval user, sample N positive posts (conversations the user actually
 participated in) and K-N random negative posts, then ask the LLM to identify
 all N posts the user would engage with.
+
+All outputs are saved to a timestamped folder (format: m_m_dd_hh_mm) under data/evaluation/.
 """
 import json
 import random
+from datetime import datetime
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -14,6 +17,18 @@ import yaml
 from tqdm import tqdm
 
 from src.llm_client import load_prompt, call_llm_json
+
+
+def _get_timestamp_folder(base_dir: Path) -> Path:
+    """Create and return a timestamped folder for this evaluation run.
+
+    Folder name format: m_m_dd_hh_mm (e.g., 3_12_10_30 for March 12, 10:30)
+    """
+    now = datetime.now()
+    folder_name = f"{now.month}_{now.day:02d}_{now.hour:02d}_{now.minute:02d}"
+    timestamp_dir = base_dir / "evaluation" / folder_name
+    timestamp_dir.mkdir(parents=True, exist_ok=True)
+    return timestamp_dir
 
 
 def load_config() -> dict:
@@ -153,6 +168,10 @@ def main():
     base_dir = Path(__file__).parent.parent.parent / "data"
     eval_dir = base_dir / "evaluation"
 
+    # Create timestamped folder for this run
+    run_dir = _get_timestamp_folder(base_dir)
+    print(f"Evaluation results will be saved to: {run_dir}")
+
     with open(eval_dir / "eval_users.json", "r") as f:
         eval_users = json.load(f)
 
@@ -221,7 +240,7 @@ def main():
         for future in tqdm(as_completed(future_to_task), total=len(tasks), desc="Evaluating"):
             results.append(future.result())
 
-    output_path = eval_dir / "eval_results.json"
+    output_path = run_dir / "eval_results.json"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
     print(f"Saved {len(results)} results to {output_path}")
@@ -234,6 +253,34 @@ def main():
         print(f"  Recall:       {avg_recall:.3f}")
         print(f"  Exact Match:  {exact_matches}/{len(results)} = {exact_matches/len(results):.3f}")
         print(f"  Random baseline precision: {n/k:.3f}")
+
+        # Save experiment metadata (config, prompt, results summary)
+        metadata = {
+            "experiment_info": {
+                "timestamp": datetime.now().isoformat(),
+                "num_evaluated_users": len(results),
+            },
+            "evaluation_config": eval_cfg,
+            "model_config": {
+                "model": model,
+                "temperature": temperature,
+            },
+            "prompt": {
+                "system": system_prompt,
+                "user_template": user_template,
+            },
+            "results_summary": {
+                "precision": avg_precision,
+                "recall": avg_recall,
+                "exact_match": exact_matches / len(results),
+                "exact_match_count": f"{exact_matches}/{len(results)}",
+                "random_baseline_precision": n / k,
+            },
+        }
+        metadata_path = run_dir / "experiment_metadata.json"
+        with open(metadata_path, "w", encoding="utf-8") as f:
+            json.dump(metadata, f, ensure_ascii=False, indent=2)
+        print(f"Saved experiment metadata to {metadata_path}")
 
 
 if __name__ == "__main__":
