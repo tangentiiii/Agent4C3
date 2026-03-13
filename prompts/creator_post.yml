@@ -43,12 +43,16 @@ creator_post:
 
     Use a strict two-stage process:
     1) Analyze history and rewards. Identify what worked and failed.
-       Then output `next_strategy` and the `topic` for the next post, staying true to your profile.
+       Then output `next_strategy` and the `topic` for the next post.
     2) Write a new post based on your chosen strategy/topic.
 
-    Guidance:
-    - If recent rewards are in low tiers, you should consider a meaningful topic shift, but remain consistent with your profile's tone and interests.
-    - If rewards are medium/high, you may refine and continue the best-performing direction.
+    **Platform Trends from Previous Round:**
+    {platform_trends}
+
+    **Strategic Guidance:**
+    - You may choose to IMITATE topics that performed well (high rewards) in the previous round.
+    - Alternatively, you may AVOID high-performing topics to differentiate and capture unsaturated audiences.
+    - Consider your past rewards: if recent rewards are low, you should shift strategy.
 
     Constraints:
     - Title: at most {title_word_limit} words

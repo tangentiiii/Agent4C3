@@ -144,8 +144,13 @@ class ContentCreator:
             lines.append("")
         return "\n".join(lines)
 
-    def create_post(self) -> dict:
-        """Generate a new post."""
+    def create_post(self, platform_trends: str | None = None) -> dict:
+        """Generate a new post.
+
+        Args:
+            platform_trends: Optional string summarizing the previous round's
+                {creator_id, topic, reward} data from all creators.
+        """
         prompt_data = load_prompt("creator_post")
         system_prompt = prompt_data["creator_post"]["system"]
 
@@ -157,6 +162,8 @@ class ContentCreator:
         else:
             template = prompt_data["creator_post"]["user_with_history"]
 
+        trends = platform_trends if platform_trends else "No previous round data available."
+
         user_prompt = (
             template
             .replace("{creator_id}", str(self.creator_id))
@@ -164,6 +171,7 @@ class ContentCreator:
             .replace("{title_word_limit}", str(title_limit))
             .replace("{abstract_word_limit}", str(abstract_limit))
             .replace("{history}", self._format_history())
+            .replace("{platform_trends}", trends)
         )
 
         response = call_llm_json(

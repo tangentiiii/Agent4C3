@@ -67,19 +67,48 @@ def create_creators(config: dict) -> list[ContentCreator]:
     return [ContentCreator(creator_id=i) for i in range(num_creators)]
 
 
-def _generate_post(creator: ContentCreator) -> dict:
-    post = creator.create_post()
+def _build_platform_trends(creators: list[ContentCreator]) -> str:
+    """Build a summary of the previous round's performance across all creators.
+
+    Returns a formatted string with {creator_id, topic, reward} for each creator.
+    """
+    if not creators:
+        return "No previous round data available."
+
+    lines = []
+    for creator in creators:
+        if creator.history:
+            last_entry = creator.history[-1]
+            post = last_entry["post"]
+            reward = last_entry["reward"]
+            topic = post.get("topic", "unknown")
+            lines.append(
+                f"Creator {creator.creator_id}: Topic='{topic}', Reward={reward}"
+            )
+
+    if not lines:
+        return "No previous round data available."
+
+    return "\n".join(lines)
+
+
+def _generate_post(creator: ContentCreator, platform_trends: str | None = None) -> dict:
+    post = creator.create_post(platform_trends=platform_trends)
     post["creator_id"] = creator.creator_id
     return post
 
 
 def _generate_posts_concurrent(
-    creators: list[ContentCreator], max_workers: int, desc: str,
+    creators: list[ContentCreator],
+    max_workers: int,
+    desc: str,
+    platform_trends: str | None = None,
 ) -> list[dict]:
     posts = [None] * len(creators)
     with ThreadPoolExecutor(max_workers=max_workers) as executor:
         future_to_idx = {
-            executor.submit(_generate_post, c): i for i, c in enumerate(creators)
+            executor.submit(_generate_post, c, platform_trends): i
+            for i, c in enumerate(creators)
         }
         for future in tqdm(as_completed(future_to_idx), total=len(creators), desc=desc):
             idx = future_to_idx[future]
@@ -141,7 +170,9 @@ def run_simulation(config: dict):
 
     # Round 0: initial posts (no interactions yet)
     print("\n--- Round 0: Initial posts ---")
-    current_posts = _generate_posts_concurrent(creators, max_workers, "Generating initial posts")
+    current_posts = _generate_posts_concurrent(
+        creators, max_workers, "Generating initial posts", platform_trends=None
+    )
 
     _save_round(run_dir, 0, current_posts, [], {}, user_names)
 
@@ -170,8 +201,11 @@ def run_simulation(config: dict):
         _save_round(run_dir, r, current_posts, all_interactions, rewards, user_names)
 
         if r < num_rounds:
+            # Build platform trends from current round (will be "previous round" for next iteration)
+            platform_trends = _build_platform_trends(creators)
             current_posts = _generate_posts_concurrent(
                 creators, max_workers, f"Round {r}: Creators posting",
+                platform_trends=platform_trends,
             )
 
     print(f"\nSimulation complete. Results saved to {run_dir}")
